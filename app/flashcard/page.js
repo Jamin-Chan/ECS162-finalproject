@@ -10,41 +10,39 @@ import {
   Typography,
   CardContent,
   Box,
-  AppBar,
-  Toolbar,
   Button,
+  Alert,
 } from "@mui/material";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { db } from "@/firebase";
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { useAuth } from "../context/AuthContext";
+import { collection, doc, getDoc } from "firebase/firestore";
 
 export default function Flashcard() {
   const [flashcards, setFlashcards] = useState([]);
   const [flipped, setFlipped] = useState({});
+  const { user } = useAuth();
+  const router = useRouter();
 
   const searchParams = useSearchParams();
   const search = searchParams.get("id");
 
   useEffect(() => {
     async function getFlashcard() {
-      if (!search) return;
+      if (!user || !search) return;
 
       const docRef = doc(
-        collection(doc(collection(db, "users"), "default"), "flashcardSets"),
+        collection(doc(collection(db, "users"), user.uid), "flashcardSets"),
         search
       );
       const docSnap = await getDoc(docRef);
-      const docData = docSnap.data().flashcards;
-
-      const flashcards = [];
-
-      docData.forEach((doc) => {
-        flashcards.push({ ...doc });
-      });
-      setFlashcards(flashcards);
+      if (docSnap.exists()) {
+        const docData = docSnap.data().flashcards;
+        setFlashcards(docData);
+      }
     }
     getFlashcard();
-  }, [search]);
+  }, [search, user]);
 
   const handleCardClick = (id) => {
     setFlipped((prev) => ({
@@ -52,6 +50,48 @@ export default function Flashcard() {
       [id]: !prev[id],
     }));
   };
+
+  if (!user) {
+    return (
+      <Container maxWidth="md">
+        <Nav />
+        <Box sx={{ my: 4 }}>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Please log in to view flashcards.
+          </Alert>
+          <Button
+            variant="contained"
+            color="primary"
+            href="/login"
+            sx={{ mt: 2 }}
+          >
+            Login
+          </Button>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!search) {
+    return (
+      <Container maxWidth="md">
+        <Nav />
+        <Box sx={{ my: 4 }}>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            No flashcard set selected.
+          </Alert>
+          <Button
+            variant="contained"
+            color="primary"
+            href="/flashcards"
+            sx={{ mt: 2 }}
+          >
+            Back to Flashcards
+          </Button>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md">
@@ -66,21 +106,27 @@ export default function Flashcard() {
         <Button color="primary" href="/flashcards">
           Back
         </Button>
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          {flashcards.map((card, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card>
-                <CardActionArea onClick={() => handleCardClick(index)}>
-                  <CardContent>
-                    <Typography variant="h6">
-                      {flipped[index] ? card.answer : card.question}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+        {flashcards.length === 0 ? (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            This flashcard set is empty.
+          </Alert>
+        ) : (
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            {flashcards.map((card, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <Card>
+                  <CardActionArea onClick={() => handleCardClick(index)}>
+                    <CardContent>
+                      <Typography variant="h6">
+                        {flipped[index] ? card.answer : card.question}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </Box>
     </Container>
   );

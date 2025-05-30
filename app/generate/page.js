@@ -4,6 +4,7 @@ import Nav from "../../public/pages/Nav.js";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/firebase";
+import { useAuth } from "../context/AuthContext";
 import {
   collection,
   doc,
@@ -26,6 +27,7 @@ import {
   DialogContentText,
   CardContent,
   CardActionArea,
+  Alert,
 } from "@mui/material";
 
 export default function Generate() {
@@ -37,15 +39,22 @@ export default function Generate() {
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
   const router = useRouter();
+  const { user } = useAuth();
 
   const saveFlashcards = async () => {
+    if (!user) {
+      alert("Please log in to save flashcards.");
+      router.push("/login");
+      return;
+    }
+
     if (!setName) {
       alert("Please enter a name for your flashcard set.");
       return;
     }
 
     try {
-      const userDocRef = doc(collection(db, "users"), "default");
+      const userDocRef = doc(collection(db, "users"), user.uid);
       const userDocSnap = await getDoc(userDocRef);
 
       const batch = writeBatch(db);
@@ -121,6 +130,11 @@ export default function Generate() {
         <Typography variant="h4" component="h1" gutterBottom>
           Generate Flashcards
         </Typography>
+        {!user && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Please log in to save your flashcards.
+          </Alert>
+        )}
         <TextField
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -166,6 +180,7 @@ export default function Generate() {
             color="primary"
             onClick={handleOpenDialog}
             sx={{ mt: 2 }}
+            disabled={!user}
           >
             Save Flashcards
           </Button>
