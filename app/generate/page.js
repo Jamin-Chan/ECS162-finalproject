@@ -165,10 +165,96 @@ export default function Generate() {
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card>
                   <CardActionArea onClick={() => handleCardClick(index)}>
-                    <CardContent>
-                      <Typography variant="h6">
-                        {flipped[index] ? card.answer : card.question}
-                      </Typography>
+                    <CardContent sx={{
+                      height: '100%',
+                      padding: 0,
+                      perspective: '1000px'
+                    }}>
+                      <Box sx={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '250px',
+                        transformStyle: 'preserve-3d',
+                        transition: 'transform 0.6s',
+                        transform: flipped[index] ? 'rotateY(180deg)' : 'rotateY(0)'
+                      }}>
+                        {/* Front of Card */}
+                        <Box sx={{
+                          position: 'absolute',
+                          width: '100%',
+                          height: '100%',
+                          backfaceVisibility: 'hidden',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          padding: 3,
+                          backgroundColor: '#ffffff',
+                          borderRadius: '4px',
+                          border: '1px solid #e0e0e0',
+                          boxSizing: 'border-box'
+                        }}>
+                          <Typography variant="overline" sx={{
+                            color: '#9e9e9e',
+                            marginBottom: 1
+                          }}>
+                            Question
+                          </Typography>
+                          <Typography variant="h6" sx={{
+                            textAlign: 'center',
+                            fontWeight: 500,
+                            color: '#424242'
+                          }}>
+                            {card.question}
+                          </Typography>
+                          <Typography variant="caption" sx={{
+                            position: 'absolute',
+                            bottom: 10,
+                            color: '#9e9e9e'
+                          }}>
+                            Click to flip
+                          </Typography>
+                        </Box>
+
+                        {/* Back of Card */}
+                        <Box sx={{
+                          position: 'absolute',
+                          width: '100%',
+                          height: '100%',
+                          backfaceVisibility: 'hidden',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          padding: 3,
+                          backgroundColor: '#f5f5f5',
+                          borderRadius: '4px',
+                          border: '1px solid #e0e0e0',
+                          boxSizing: 'border-box',
+                          transform: 'rotateY(180deg)'
+                        }}>
+                          <Typography variant="overline" sx={{
+                            color: '#9e9e9e',
+                            marginBottom: 1
+                          }}>
+                            Answer
+                          </Typography>
+                          <Typography variant="h6" sx={{
+                            textAlign: 'center',
+                            fontWeight: 500,
+                            color: '#424242'
+                          }}>
+                            {card.answer}
+                          </Typography>
+                          <Typography variant="caption" sx={{
+                            position: 'absolute',
+                            bottom: 10,
+                            color: '#9e9e9e'
+                          }}>
+                            Click to flip back
+                          </Typography>
+                        </Box>
+                      </Box>
                     </CardContent>
                   </CardActionArea>
                 </Card>

@@ -137,7 +137,7 @@ export default function Home() {
                 sx={{
                   display: "flex",
                   flexDirection: isMobile ? "column" : "row",
-                  gap: 2,
+                  gap: 9,
                   mt: 2,
                 }}
               >
