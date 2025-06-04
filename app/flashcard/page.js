@@ -234,14 +234,19 @@ export default function Flashcard() {
                           boxSizing: 'border-box'
                         }}>
                           <Typography variant="overline" sx={{ 
-                            color: '#9e9e9e',
-                            marginBottom: 1
+                            color: '#9e9e9e'
                           }}>
                             Question
                           </Typography>
                           <Typography variant="h6" sx={{ 
                             textAlign: 'center',
                             fontWeight: 500,
+                            fontSize: {
+                              xs: '1rem',
+                              sm: '1rem',
+                              md: '1rem',
+                              lg: '1rem',
+                            },
                             color: '#424242'
                           }}>
                             {card.question}
@@ -274,13 +279,18 @@ export default function Flashcard() {
                         }}>
                           <Typography variant="overline" sx={{ 
                             color: '#9e9e9e',
-                            marginBottom: 1
                           }}>
                             Answer
                           </Typography>
                           <Typography variant="h6" sx={{ 
                             textAlign: 'center',
                             fontWeight: 500,
+                            fontSize: {
+                              xs: '1rem',
+                              sm: '1rem',
+                              md: '1rem',
+                              lg: '1rem',
+                            },
                             color: '#424242'
                           }}>
                             {card.answer}
