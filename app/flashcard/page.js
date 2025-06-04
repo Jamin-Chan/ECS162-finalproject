@@ -188,8 +188,9 @@ export default function Flashcard() {
             {flashcards.map((card, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card sx={{ 
-                  height: '100%',
-                  minHeight: 180,
+                  aspectRatio: '1 / 1',
+                  // height: '100%',
+                  // minHeight: 180,
                   display: 'flex',
                   flexDirection: 'column',
                   borderRadius: 3,
@@ -202,7 +203,7 @@ export default function Flashcard() {
                 }}>
                   <CardActionArea 
                       onClick={() => handleCardClick(index)}
-                    sx={{ height: '100%' }}
+                      sx={{ height: '100%' }}
                   >
                     <CardContent sx={{ 
                       height: '100%',
@@ -211,8 +212,8 @@ export default function Flashcard() {
                     }}>
                       <Box sx={{
                         position: 'relative',
+                        height: '100%',
                         width: '100%',
-                        height: '250px',
                         transformStyle: 'preserve-3d',
                         transition: 'transform 0.6s',
                         transform: flipped[index] ? 'rotateY(180deg)' : 'rotateY(0)'
@@ -220,8 +221,8 @@ export default function Flashcard() {
                         {/* Front of Card */}
                         <Box sx={{
                           position: 'absolute',
-                          width: '100%',
                           height: '100%',
+                          width: '100%',
                           backfaceVisibility: 'hidden',
                           display: 'flex',
                           flexDirection: 'column',
