@@ -11,15 +11,24 @@ import {
   Box,
   Button,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useState, useEffect } from "react";
 import { db } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
-import { collection, doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 
 export default function Flashcard() {
   const [flashcards, setFlashcards] = useState([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [setToDelete, setSetToDelete] = useState(null);
   const router = useRouter();
   const { user } = useAuth();
 
@@ -47,6 +56,44 @@ export default function Flashcard() {
   const handleCreateNew = () => {
       router.push("/generate")
     }
+
+  const handleDeleteClick = (e, flashcardSet) => {
+    e.stopPropagation(); // Prevent card click when delete button is clicked
+    setSetToDelete(flashcardSet);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!user || !setToDelete) return;
+
+    try {
+      // Remove the flashcard set from the user's document
+      const userDocRef = doc(collection(db, "users"), user.uid);
+      const updatedSets = flashcards.filter(set => set.name !== setToDelete.name);
+      await updateDoc(userDocRef, { flashcardSets: updatedSets });
+
+      // Delete the flashcard set subcollection document
+      const setDocRef = doc(collection(userDocRef, "flashcardSets"), setToDelete.name);
+      await deleteDoc(setDocRef);
+
+      // Update local state
+      setFlashcards(updatedSets);
+      
+      // Close dialog and reset state
+      setDeleteDialogOpen(false);
+      setSetToDelete(null);
+      
+      alert("Flashcard set deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting flashcard set:", error);
+      alert("An error occurred while deleting the flashcard set. Please try again.");
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setSetToDelete(null);
+  };
 
   if (!user) {
     return (
@@ -135,11 +182,32 @@ export default function Flashcard() {
                   transition: 'all 0.3s ease',
                   borderRadius: '12px',
                   boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                  position: 'relative',
                   '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: '0 12px 20px rgba(0,0,0,0.12)'
                   }
                 }}>
+                  {/* Delete Button */}
+                  <IconButton
+                    onClick={(e) => handleDeleteClick(e, flashcard)}
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      color: '#f44336',
+                      zIndex: 1,
+                      '&:hover': {
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        color: '#d32f2f'
+                      }
+                    }}
+                    size="small"
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+
                   <CardActionArea 
                     onClick={() => handleCardClick(flashcard.name)}
                     sx={{ 
@@ -147,16 +215,12 @@ export default function Flashcard() {
                       padding: 3
                     }}
                   >
-
-
                     <CardContent sx={{ 
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between'
                     }}>
-
-                      
                       <Box>
                         <Typography variant="h5" sx={{
                           fontWeight: 600,
@@ -256,6 +320,25 @@ export default function Flashcard() {
             Back to Dashboard
           </Button>
         </Box>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+          <DialogTitle>Delete Flashcard Set</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete the flashcard set "{setToDelete?.name}"? 
+              This action cannot be undone and will permanently remove all flashcards in this set.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteCancel} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     )
 }
