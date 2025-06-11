@@ -94,7 +94,7 @@ export default function Home() {
             minHeight: isMobile ? "auto" : "100vh",
           }}
         >
-          <Grid container spacing={6} alignItems="center">
+          <Grid sx={{ display: "flex", alignItems: "center", justifyContent: "center"}}>
             <Grid
               item
               xs={12}
@@ -103,6 +103,10 @@ export default function Home() {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
+                alignItems: "center",
+                width: "75%",
+                textAlign: "center"
+                //backgroundColor: "black"
               }}
             >
               <Typography
